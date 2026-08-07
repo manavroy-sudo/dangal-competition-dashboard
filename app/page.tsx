@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { LEADERS } from "./leaders-data";
+import { LEADERS, leadersForSide, Leader } from "./leaders-data";
 
 interface Side {
   name: string;
@@ -77,128 +77,157 @@ function MeterBar({
   );
 }
 
-function LeaderCard({ name, state, role, file }: { name: string; state: string; role?: string; file: string }) {
+function CollagePhoto({ leader, i }: { leader: Leader; i: number }) {
   const [failed, setFailed] = useState(false);
+  // Deterministic pseudo-scatter: vary size/offset/rotation by index so the
+  // arrangement is stable across renders without needing real randomness.
+  const size = 58 + ((i * 37) % 40);
+  const rise = (i % 2 === 0 ? -1 : 1) * (6 + ((i * 13) % 22));
+  const rot = ((i * 17) % 24) - 12;
+  if (failed) return null;
   return (
-    <div className="lcard">
-      <div className="lphoto">
-        {!failed ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/leaders/${file}`} alt={name} onError={() => setFailed(true)} />
-        ) : (
-          <span className="ph">🤼</span>
-        )}
-      </div>
-      <div className="lname">
-        {name}
-        {role ? <span className="lrole"> · {role}</span> : null}
-      </div>
-      <div className="lstate">{state}</div>
+    <div
+      className="cphoto"
+      style={{
+        width: size,
+        height: size,
+        transform: `translateY(${rise}px) rotate(${rot}deg)`,
+        marginLeft: i === 0 ? 0 : -Math.round(size * 0.32),
+        zIndex: i % 5,
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/leaders/${leader.file}`} alt="" onError={() => setFailed(true)} />
       <style jsx>{`
-        .lcard {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 96px;
-          text-align: center;
-        }
-        .lphoto {
-          width: 68px;
-          height: 68px;
+        .cphoto {
           border-radius: 50%;
           overflow: hidden;
-          border: 2px solid var(--gold-deep);
-          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: radial-gradient(circle at 35% 30%, var(--surface-2), var(--arena-bg-3));
-          margin-bottom: 6px;
+          border: 3px solid var(--gold-deep);
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+          flex: none;
         }
-        .lphoto img {
+        .cphoto img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
-        .ph {
-          font-size: 26px;
-          opacity: 0.55;
-        }
-        .lname {
-          font-size: 11px;
-          font-weight: 700;
-          color: var(--text-primary);
-          line-height: 1.25;
-        }
-        .lrole {
-          font-weight: 500;
-          color: var(--text-muted);
-        }
-        .lstate {
-          font-size: 10px;
-          color: var(--gold);
-          margin-top: 1px;
-          line-height: 1.2;
-        }
       `}</style>
     </div>
   );
 }
 
-function LeaderPhotoBand() {
+function DangalCollage() {
   return (
-    <div className="band">
-      <div className="band-track">
-        {LEADERS.map((l) => (
-          <LeaderCard key={l.file} {...l} />
+    <div className="collage">
+      <div className="collage-track">
+        {LEADERS.map((l, i) => (
+          <CollagePhoto key={l.file} leader={l} i={i} />
         ))}
       </div>
-      <div className="scrim" />
+      <div className="collage-scrim" />
       <style jsx>{`
-        .band {
-          position: relative;
-          overflow: hidden;
-          border-radius: 20px 20px 0 0;
-        }
-        .band-track {
-          display: flex;
-          gap: 16px;
-          align-items: flex-start;
-          padding: 24px 24px 30px;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-        .scrim {
+        .collage {
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(16, 4, 3, 0) 60%, var(--arena-bg-3) 100%);
-          pointer-events: none;
+          border-radius: 24px;
+          overflow: hidden;
+          z-index: 0;
         }
-      `}</style>
-    </div>
-  );
-}
-
-function CornerBadge({ name, color }: { name: string; color: string }) {
-  return (
-    <div className="badge">
-      <span>{initials(name)}</span>
-      <style jsx>{`
-        .badge {
-          width: 46px;
-          height: 46px;
-          min-width: 46px;
-          border-radius: 50%;
+        .collage-track {
+          position: absolute;
+          inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-wrap: wrap;
+          row-gap: 10px;
+          padding: 10px 40px;
+          opacity: 0.85;
+        }
+        .collage-scrim {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(70% 90% at 50% 45%, rgba(16, 4, 3, 0.35), rgba(16, 4, 3, 0.82) 75%),
+            linear-gradient(180deg, rgba(16, 4, 3, 0.4) 0%, rgba(16, 4, 3, 0.55) 55%, var(--arena-bg-3) 100%);
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function SideBadge({ sideName, color }: { sideName: string; color: string }) {
+  const leaders = leadersForSide(sideName).slice(0, 3);
+  if (leaders.length === 0) {
+    return (
+      <div className="badge">
+        <span>{initials(sideName)}</span>
+        <style jsx>{`
+          .badge {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display), sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            background: radial-gradient(circle at 35% 30%, ${color}, ${color}bb 70%);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+          }
+        `}</style>
+      </div>
+    );
+  }
+  return (
+    <div className="stack" title={leaders.map((l) => `${l.name} (${l.state})`).join(", ")}>
+      {leaders.map((l, i) => (
+        <SidePhoto key={l.file} leader={l} color={color} offset={i} />
+      ))}
+      <style jsx>{`
+        .stack {
+          display: flex;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function SidePhoto({ leader, color, offset }: { leader: Leader; color: string; offset: number }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className="sp" style={{ marginLeft: offset === 0 ? 0 : -16, zIndex: 3 - offset }}>
+      {!failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/leaders/${leader.file}`} alt={leader.name} onError={() => setFailed(true)} />
+      ) : (
+        <span>{initials(leader.name)}</span>
+      )}
+      <style jsx>{`
+        .sp {
+          width: 42px;
+          height: 42px;
+          min-width: 42px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid ${color};
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--surface-2);
           font-family: var(--font-display), sans-serif;
           font-weight: 700;
-          font-size: 15px;
+          font-size: 12px;
           color: #fff;
-          background: radial-gradient(circle at 35% 30%, ${color}, ${color}bb 70%);
-          border: 2px solid rgba(255, 255, 255, 0.25);
-          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+        }
+        .sp img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
       `}</style>
     </div>
@@ -226,7 +255,7 @@ function BoutCard({ match }: { match: Match }) {
 
       <div className="face-off">
         <div className={`side ${leader === "A" ? "win" : ""}`}>
-          <CornerBadge name={teamA.name} color="var(--corner-blue)" />
+          <SideBadge sideName={teamA.name} color="var(--corner-blue)" />
           <div className="side-name">{teamA.name}</div>
           <div className="side-avg">{fmtPct(teamA.weighted)}</div>
         </div>
@@ -234,7 +263,7 @@ function BoutCard({ match }: { match: Match }) {
         <div className={`side ${leader === "B" ? "win" : ""}`}>
           <div className="side-name">{teamB.name}</div>
           <div className="side-avg">{fmtPct(teamB.weighted)}</div>
-          <CornerBadge name={teamB.name} color="var(--corner-red)" />
+          <SideBadge sideName={teamB.name} color="var(--corner-red)" />
         </div>
       </div>
 
@@ -500,8 +529,7 @@ export default function Page() {
   return (
     <main className="page">
       <header className="hero">
-        <LeaderPhotoBand />
-        <p className="roster-caption">🏆 ZONAL LEADERS BATTLING FOR THE TOP SPOT</p>
+        <DangalCollage />
         <div className="ring" aria-hidden="true" />
         <span className="pill">⚔️ STATE VS STATE · LIVE · REFRESHES EVERY 30 MIN</span>
         <h1>
@@ -587,7 +615,13 @@ export default function Page() {
           text-align: center;
           margin-bottom: 28px;
           position: relative;
-          padding: 28px 16px 10px;
+          padding: 54px 16px 10px;
+          min-height: 300px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          overflow: hidden;
+          border-radius: 24px;
         }
         .ring {
           position: absolute;
@@ -600,14 +634,6 @@ export default function Page() {
           border: 2px dashed rgba(212, 175, 55, 0.18);
           pointer-events: none;
           z-index: 0;
-        }
-        .roster-caption {
-          position: relative;
-          font-size: 10.5px;
-          letter-spacing: 0.1em;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          margin: 0 0 18px;
         }
         .pill {
           position: relative;

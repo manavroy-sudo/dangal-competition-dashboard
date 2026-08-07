@@ -38,3 +38,37 @@ export const LEADERS: Leader[] = [
   { name: "Vinothbabu Nagarajan", state: "Tamil Nadu", file: "vinothbabu-nagarajan.jpg" },
   { name: "Vishal", state: "Bihar", file: "vishal.jpeg" },
 ];
+
+// Maps a bout side's exact display name (as it comes out of the sheet) to the
+// keyword(s) matched against LEADERS[].state to find that side's leader(s).
+const SIDE_LEADER_KEYWORDS: Record<string, string[]> = {
+  "UP1 + UK1 + UK2": ["UP1"],
+  "Delhi + NCR + Haryana": ["NCR", "Haryana"],
+  "West Bengal": ["West Bengal"],
+  "J&K": ["J&K"],
+  Bihar: ["Bihar"],
+  Punjab: ["Punjab"],
+  Jharkhand: ["Jharkhand"],
+  "Tamil Nadu": ["Tamil Nadu"],
+  Gujarat: ["Gujarat"],
+  "Rajasthan 1 + 2": ["Rajasthan"],
+  Karnataka: ["Karnataka"],
+  "ROM 2": ["ROM 1 & 2", "ROM 2"],
+  "MP/CG": ["MP/CG", "MP-CG"],
+  Telengana: ["Telangana", "AP-TS"],
+  Telangana: ["Telangana", "AP-TS"],
+  "Himachal Pradesh": ["Himachal", "HP"],
+  Pune: [],
+  Chandigarh: ["Chandigarh"],
+  "Andhra Pradesh": ["AP-TS", "Andhra"],
+  "ROM 1": ["ROM 1 & 2", "ROM 1"],
+  Orissa: ["Orissa"],
+  Mumbai: ["Mumbai"],
+  Kerala: ["Kerala"],
+};
+
+export function leadersForSide(sideName: string): Leader[] {
+  const keys = SIDE_LEADER_KEYWORDS[sideName.trim()] || [];
+  if (keys.length === 0) return [];
+  return LEADERS.filter((l) => keys.some((k) => l.state.toLowerCase().includes(k.toLowerCase())));
+}
