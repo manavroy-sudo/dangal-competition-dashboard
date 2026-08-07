@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { LEADERS } from "./leaders-data";
 
 interface Side {
   name: string;
@@ -76,24 +77,34 @@ function MeterBar({
   );
 }
 
-const LEADER_COUNT = 22;
-
-function LeaderAvatar({ index }: { index: number }) {
+function LeaderCard({ name, state, role, file }: { name: string; state: string; role?: string; file: string }) {
   const [failed, setFailed] = useState(false);
-  const src = `/leaders/leader-${String(index).padStart(2, "0")}.jpg`;
   return (
-    <div className="avatar">
-      {!failed ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" onError={() => setFailed(true)} />
-      ) : (
-        <span className="ph">🤼</span>
-      )}
+    <div className="lcard">
+      <div className="lphoto">
+        {!failed ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={`/leaders/${file}`} alt={name} onError={() => setFailed(true)} />
+        ) : (
+          <span className="ph">🤼</span>
+        )}
+      </div>
+      <div className="lname">
+        {name}
+        {role ? <span className="lrole"> · {role}</span> : null}
+      </div>
+      <div className="lstate">{state}</div>
       <style jsx>{`
-        .avatar {
-          width: 64px;
-          height: 64px;
-          min-width: 64px;
+        .lcard {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 96px;
+          text-align: center;
+        }
+        .lphoto {
+          width: 68px;
+          height: 68px;
           border-radius: 50%;
           overflow: hidden;
           border: 2px solid var(--gold-deep);
@@ -102,15 +113,32 @@ function LeaderAvatar({ index }: { index: number }) {
           align-items: center;
           justify-content: center;
           background: radial-gradient(circle at 35% 30%, var(--surface-2), var(--arena-bg-3));
+          margin-bottom: 6px;
         }
-        .avatar img {
+        .lphoto img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
         .ph {
-          font-size: 24px;
+          font-size: 26px;
           opacity: 0.55;
+        }
+        .lname {
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--text-primary);
+          line-height: 1.25;
+        }
+        .lrole {
+          font-weight: 500;
+          color: var(--text-muted);
+        }
+        .lstate {
+          font-size: 10px;
+          color: var(--gold);
+          margin-top: 1px;
+          line-height: 1.2;
         }
       `}</style>
     </div>
@@ -118,34 +146,32 @@ function LeaderAvatar({ index }: { index: number }) {
 }
 
 function LeaderPhotoBand() {
-  const leaders = Array.from({ length: LEADER_COUNT }, (_, i) => i + 1);
   return (
     <div className="band">
       <div className="band-track">
-        {leaders.map((i) => (
-          <LeaderAvatar key={i} index={i} />
+        {LEADERS.map((l) => (
+          <LeaderCard key={l.file} {...l} />
         ))}
       </div>
       <div className="scrim" />
       <style jsx>{`
         .band {
           position: relative;
-          height: 130px;
           overflow: hidden;
           border-radius: 20px 20px 0 0;
         }
         .band-track {
           display: flex;
-          gap: 14px;
-          align-items: center;
-          padding: 20px 24px;
+          gap: 16px;
+          align-items: flex-start;
+          padding: 24px 24px 30px;
           flex-wrap: wrap;
           justify-content: center;
         }
         .scrim {
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(16, 4, 3, 0.15) 0%, var(--arena-bg-3) 96%);
+          background: linear-gradient(180deg, rgba(16, 4, 3, 0) 60%, var(--arena-bg-3) 100%);
           pointer-events: none;
         }
       `}</style>
