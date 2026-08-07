@@ -9,54 +9,42 @@ body {
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color-scheme: light;
-  --surface-1: #fcfcfb;
-  --page-plane: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --baseline: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
-  --series-a: #2a78d6;
-  --series-b: #eb6834;
-  --good: #0ca30c;
-  --good-bg: #e6f6e6;
-  background: var(--page-plane);
-  color: var(--text-primary);
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not([data-theme="light"]) {
-    color-scheme: dark;
-    --surface-1: #1a1a19;
-    --page-plane: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --baseline: #383835;
-    --border: rgba(255, 255, 255, 0.1);
-    --series-a: #3987e5;
-    --series-b: #d95926;
-    --good: #0ca30c;
-    --good-bg: #123312;
-  }
-}
-
-body[data-theme="dark"] {
+  font-family: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
-  --surface-1: #1a1a19;
-  --page-plane: #0d0d0d;
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --gridline: #2c2c2a;
-  --baseline: #383835;
-  --border: rgba(255, 255, 255, 0.1);
-  --series-a: #3987e5;
-  --series-b: #d95926;
-  --good: #0ca30c;
-  --good-bg: #123312;
+
+  /* Arena / akhada palette */
+  --arena-bg-1: #1c0a06;
+  --arena-bg-2: #2c0f0a;
+  --arena-bg-3: #100403;
+  --sand: #6b3a1f;
+  --rope: #d4af37;
+
+  --surface-1: #2a1410;
+  --surface-2: #351a14;
+  --text-primary: #fbf3e7;
+  --text-secondary: #e2c9ab;
+  --text-muted: #a9846a;
+  --gridline: rgba(212, 175, 55, 0.16);
+  --baseline: rgba(251, 243, 231, 0.14);
+  --border: rgba(212, 175, 55, 0.25);
+
+  --gold: #f0c419;
+  --gold-deep: #d4af37;
+  --corner-blue: #3987e5;
+  --corner-red: #ef4a44;
+  --good: #2fbf5f;
+  --good-bg: rgba(47, 191, 95, 0.14);
+
+  background-color: var(--arena-bg-3);
+  background-image:
+    radial-gradient(1100px 620px at 50% -8%, rgba(240, 196, 25, 0.16), transparent 60%),
+    radial-gradient(900px 700px at 50% 40%, var(--arena-bg-2), var(--arena-bg-3) 70%),
+    repeating-radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 2px, transparent 4px);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--gold);
+  color: #1c0a06;
 }
