@@ -35,6 +35,21 @@ body {
   --good: #2fbf5f;
   --good-bg: rgba(47, 191, 95, 0.14);
 
+  /* Win / lose scheme used on white card surfaces */
+  --win: #1c9a4b;
+  --win-bg: #e5f7ec;
+  --lose: #d9342f;
+  --lose-bg: #fcebea;
+  --neutral: #8a8a8a;
+  --neutral-bg: #f0f0ee;
+  --card-surface: #ffffff;
+  --card-border: rgba(20, 12, 6, 0.1);
+  --card-text-primary: #1f140c;
+  --card-text-secondary: #5a4a3d;
+  --card-text-muted: #8a7a6c;
+  --card-gridline: rgba(20, 12, 6, 0.08);
+  --meter-track: #eef0ec;
+
   background-color: var(--arena-bg-3);
   background-image:
     radial-gradient(1100px 620px at 50% -8%, rgba(240, 196, 25, 0.16), transparent 60%),

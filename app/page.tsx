@@ -36,33 +36,34 @@ function initials(name: string) {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-function MeterBar({
-  value,
-  color,
-  glow,
-}: {
-  value: number | null;
-  color: string;
-  glow: boolean;
-}) {
+type Status = "win" | "lose" | "neutral";
+
+const STATUS_COLOR: Record<Status, string> = {
+  win: "var(--win)",
+  lose: "var(--lose)",
+  neutral: "var(--neutral)",
+};
+
+function MeterBar({ value, status }: { value: number | null; status: Status }) {
   const width = value === null ? 0 : Math.min(100, Math.max(0, value));
+  const color = STATUS_COLOR[status];
   return (
     <div className="meter">
       <div
-        className={`meter-fill ${glow ? "glow" : ""}`}
+        className={`meter-fill ${status === "win" ? "glow" : ""}`}
         style={{
           width: `${width}%`,
-          background: value === null ? "var(--baseline)" : `linear-gradient(90deg, ${color}aa, ${color})`,
+          background: value === null ? "var(--neutral)" : `linear-gradient(90deg, ${color}aa, ${color})`,
         }}
       />
       <style jsx>{`
         .meter {
           height: 12px;
           border-radius: 999px;
-          background: rgba(0, 0, 0, 0.35);
-          border: 1px solid var(--border);
+          background: var(--meter-track);
+          border: 1px solid var(--card-border);
           overflow: hidden;
-          box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
         }
         .meter-fill {
           height: 100%;
@@ -70,7 +71,7 @@ function MeterBar({
           transition: width 0.5s ease;
         }
         .meter-fill.glow {
-          box-shadow: 0 0 10px 1px var(--gold);
+          box-shadow: 0 0 8px 1px var(--win);
         }
       `}</style>
     </div>
@@ -155,7 +156,8 @@ function DangalCollage() {
   );
 }
 
-function SideBadge({ sideName, color }: { sideName: string; color: string }) {
+function SideBadge({ sideName, status }: { sideName: string; status: Status }) {
+  const color = STATUS_COLOR[status];
   const leaders = leadersForSide(sideName).slice(0, 3);
   if (leaders.length === 0) {
     return (
@@ -175,8 +177,8 @@ function SideBadge({ sideName, color }: { sideName: string; color: string }) {
             font-size: 15px;
             color: #fff;
             background: radial-gradient(circle at 35% 30%, ${color}, ${color}bb 70%);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
           }
         `}</style>
       </div>
@@ -234,18 +236,26 @@ function SidePhoto({ leader, color, offset }: { leader: Leader; color: string; o
   );
 }
 
+function sideStatus(side: "A" | "B", leader: Match["leader"]): Status {
+  if (leader === side) return "win";
+  if (leader === "TIE" || leader === "PENDING") return "neutral";
+  return "lose";
+}
+
 function BoutCard({ match }: { match: Match }) {
   const { teamA, teamB, leader } = match;
   const leaderName = leader === "A" ? teamA.name : leader === "B" ? teamB.name : null;
+  const statusA = sideStatus("A", leader);
+  const statusB = sideStatus("B", leader);
 
   return (
     <div className={`bout ${leader !== "PENDING" ? "decided" : ""}`}>
-      <span className="flag flag-a" aria-hidden="true" />
-      <span className="flag flag-b" aria-hidden="true" />
+      <span className={`flag flag-a ${statusA}`} aria-hidden="true" />
+      <span className={`flag flag-b ${statusB}`} aria-hidden="true" />
       <div className="bout-top">
         <span className="bout-no">BOUT {String(match.id).padStart(2, "0")}</span>
         {leaderName ? (
-          <span className="result">🏆 {leaderName}</span>
+          <span className="result win">🏆 {leaderName}</span>
         ) : leader === "TIE" ? (
           <span className="result tie">🤝 Tie</span>
         ) : (
@@ -254,16 +264,16 @@ function BoutCard({ match }: { match: Match }) {
       </div>
 
       <div className="face-off">
-        <div className={`side ${leader === "A" ? "win" : ""}`}>
-          <SideBadge sideName={teamA.name} color="var(--corner-blue)" />
+        <div className={`side ${statusA}`}>
+          <SideBadge sideName={teamA.name} status={statusA} />
           <div className="side-name">{teamA.name}</div>
           <div className="side-avg">{fmtPct(teamA.weighted)}</div>
         </div>
         <div className="vs-badge">VS</div>
-        <div className={`side ${leader === "B" ? "win" : ""}`}>
+        <div className={`side ${statusB}`}>
+          <SideBadge sideName={teamB.name} status={statusB} />
           <div className="side-name">{teamB.name}</div>
           <div className="side-avg">{fmtPct(teamB.weighted)}</div>
-          <SideBadge sideName={teamB.name} color="var(--corner-red)" />
         </div>
       </div>
 
@@ -271,39 +281,39 @@ function BoutCard({ match }: { match: Match }) {
         <div className="stat-block">
           <div className="stat-label">Onboarding %</div>
           <div className="stat-row">
-            <span className="stat-num a">{fmtPct(teamA.onbPct)}</span>
-            <MeterBar value={teamA.onbPct} color="var(--corner-blue)" glow={leader === "A"} />
+            <span className={`stat-num ${statusA}`}>{fmtPct(teamA.onbPct)}</span>
+            <MeterBar value={teamA.onbPct} status={statusA} />
           </div>
           <div className="stat-row">
-            <MeterBar value={teamB.onbPct} color="var(--corner-red)" glow={leader === "B"} />
-            <span className="stat-num b">{fmtPct(teamB.onbPct)}</span>
+            <span className={`stat-num ${statusB}`}>{fmtPct(teamB.onbPct)}</span>
+            <MeterBar value={teamB.onbPct} status={statusB} />
           </div>
         </div>
 
         <div className="stat-block">
           <div className="stat-label">Activation %</div>
           <div className="stat-row">
-            <span className="stat-num a">{fmtPct(teamA.actPct)}</span>
-            <MeterBar value={teamA.actPct} color="var(--corner-blue)" glow={leader === "A"} />
+            <span className={`stat-num ${statusA}`}>{fmtPct(teamA.actPct)}</span>
+            <MeterBar value={teamA.actPct} status={statusA} />
           </div>
           <div className="stat-row">
-            <MeterBar value={teamB.actPct} color="var(--corner-red)" glow={leader === "B"} />
-            <span className="stat-num b">{fmtPct(teamB.actPct)}</span>
+            <span className={`stat-num ${statusB}`}>{fmtPct(teamB.actPct)}</span>
+            <MeterBar value={teamB.actPct} status={statusB} />
           </div>
         </div>
       </div>
 
       <style jsx>{`
         .bout {
-          background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
-          border: 1px solid var(--border);
+          background: var(--card-surface);
+          border: 1px solid var(--card-border);
           border-radius: 16px;
           padding: 18px 18px 16px;
           position: relative;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
         }
         .bout.decided {
-          border-color: rgba(240, 196, 25, 0.35);
+          border-color: rgba(20, 12, 6, 0.16);
         }
         .flag {
           position: absolute;
@@ -315,12 +325,19 @@ function BoutCard({ match }: { match: Match }) {
         .flag-a {
           left: 16px;
           border-width: 0 10px 16px 10px;
-          border-color: transparent transparent var(--corner-blue) transparent;
         }
         .flag-b {
           right: 16px;
           border-width: 0 10px 16px 10px;
-          border-color: transparent transparent var(--corner-red) transparent;
+        }
+        .flag.win {
+          border-color: transparent transparent var(--win) transparent;
+        }
+        .flag.lose {
+          border-color: transparent transparent var(--lose) transparent;
+        }
+        .flag.neutral {
+          border-color: transparent transparent var(--neutral) transparent;
         }
         .bout-top {
           display: flex;
@@ -332,66 +349,73 @@ function BoutCard({ match }: { match: Match }) {
           font-family: var(--font-display), sans-serif;
           font-size: 12px;
           letter-spacing: 0.12em;
-          color: var(--text-muted);
+          color: var(--card-text-muted);
           font-weight: 600;
         }
         .result {
           font-size: 12.5px;
           font-weight: 700;
-          color: var(--gold);
-          background: rgba(240, 196, 25, 0.12);
-          border: 1px solid rgba(240, 196, 25, 0.3);
           padding: 3px 10px;
           border-radius: 999px;
+          border: 1px solid transparent;
+        }
+        .result.win {
+          color: var(--win);
+          background: var(--win-bg);
+          border-color: rgba(28, 154, 75, 0.3);
         }
         .result.tie {
-          color: var(--text-secondary);
-          background: rgba(255, 255, 255, 0.06);
-          border-color: var(--border);
+          color: var(--card-text-secondary);
+          background: var(--neutral-bg);
+          border-color: var(--card-border);
         }
         .result.pending {
-          color: var(--text-muted);
-          background: rgba(255, 255, 255, 0.04);
-          border-color: var(--border);
+          color: var(--card-text-muted);
+          background: var(--neutral-bg);
+          border-color: var(--card-border);
         }
         .face-off {
           display: grid;
           grid-template-columns: 1fr auto 1fr;
-          align-items: center;
+          align-items: start;
           gap: 10px;
           margin-bottom: 16px;
         }
         .side {
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           min-width: 0;
-        }
-        .side:last-child {
-          flex-direction: row-reverse;
-          text-align: right;
+          text-align: center;
+          padding-top: 6px;
         }
         .side-name {
           font-size: 13px;
-          font-weight: 600;
-          color: var(--text-secondary);
+          font-weight: 700;
+          color: var(--card-text-secondary);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          max-width: 100%;
         }
         .side.win .side-name {
-          color: var(--gold);
+          color: var(--win);
+        }
+        .side.lose .side-name {
+          color: var(--lose);
         }
         .side-avg {
           font-family: var(--font-display), sans-serif;
           font-size: 18px;
           font-weight: 700;
-          color: var(--text-primary);
-          min-width: 46px;
+          color: var(--card-text-primary);
         }
         .side.win .side-avg {
-          color: var(--gold);
-          text-shadow: 0 0 12px rgba(240, 196, 25, 0.5);
+          color: var(--win);
+        }
+        .side.lose .side-avg {
+          color: var(--lose);
         }
         .vs-badge {
           font-family: var(--font-display), sans-serif;
@@ -406,6 +430,7 @@ function BoutCard({ match }: { match: Match }) {
           align-items: center;
           justify-content: center;
           box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+          margin-top: 60px;
         }
         .stats {
           display: flex;
@@ -416,7 +441,7 @@ function BoutCard({ match }: { match: Match }) {
           font-size: 10.5px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
-          color: var(--text-muted);
+          color: var(--card-text-muted);
           margin-bottom: 6px;
         }
         .stat-row {
@@ -426,23 +451,18 @@ function BoutCard({ match }: { match: Match }) {
           gap: 8px;
           margin-bottom: 4px;
         }
-        .stat-row:last-child {
-          grid-template-columns: 1fr 42px;
-        }
         .stat-num {
           font-size: 12px;
           font-weight: 700;
           font-variant-numeric: tabular-nums;
           text-align: right;
+          color: var(--card-text-secondary);
         }
-        .stat-row:last-child .stat-num {
-          text-align: left;
+        .stat-num.win {
+          color: var(--win);
         }
-        .stat-num.a {
-          color: var(--corner-blue);
-        }
-        .stat-num.b {
-          color: var(--corner-red);
+        .stat-num.lose {
+          color: var(--lose);
         }
       `}</style>
     </div>
@@ -551,10 +571,10 @@ export default function Page() {
 
       <section className="legend">
         <span className="legend-item">
-          <i style={{ background: "var(--corner-blue)" }} /> Corner A
+          <i style={{ background: "var(--win)" }} /> Leading state
         </span>
         <span className="legend-item">
-          <i style={{ background: "var(--corner-red)" }} /> Corner B
+          <i style={{ background: "var(--lose)" }} /> Trailing state
         </span>
         <span className="legend-note">Weightage = (Onboarding % + Activation %) / 2 — higher average wins the bout</span>
       </section>
@@ -578,23 +598,27 @@ export default function Page() {
             </tr>
           </thead>
           <tbody>
-            {ranked.map((m, i) => (
-              <tr key={m.id}>
-                <td className="rank">{i + 1}</td>
-                <td className={m.leader === "A" ? "win" : ""}>{m.teamA.name}</td>
-                <td>{fmtPct(m.teamA.onbPct)}</td>
-                <td>{fmtPct(m.teamA.actPct)}</td>
-                <td className={m.leader === "A" ? "win" : ""}>{fmtPct(m.teamA.weighted)}</td>
-                <td className="vs-cell">vs</td>
-                <td className={m.leader === "B" ? "win" : ""}>{m.teamB.name}</td>
-                <td>{fmtPct(m.teamB.onbPct)}</td>
-                <td>{fmtPct(m.teamB.actPct)}</td>
-                <td className={m.leader === "B" ? "win" : ""}>{fmtPct(m.teamB.weighted)}</td>
-                <td className="win">
-                  {m.leader === "A" ? m.teamA.name : m.leader === "B" ? m.teamB.name : m.leader === "TIE" ? "Tie" : "Pending"}
-                </td>
-              </tr>
-            ))}
+            {ranked.map((m, i) => {
+              const statusA = sideStatus("A", m.leader);
+              const statusB = sideStatus("B", m.leader);
+              return (
+                <tr key={m.id}>
+                  <td className="rank">{i + 1}</td>
+                  <td className={statusA}>{m.teamA.name}</td>
+                  <td>{fmtPct(m.teamA.onbPct)}</td>
+                  <td>{fmtPct(m.teamA.actPct)}</td>
+                  <td className={statusA}>{fmtPct(m.teamA.weighted)}</td>
+                  <td className="vs-cell">vs</td>
+                  <td className={statusB}>{m.teamB.name}</td>
+                  <td>{fmtPct(m.teamB.onbPct)}</td>
+                  <td>{fmtPct(m.teamB.actPct)}</td>
+                  <td className={statusB}>{fmtPct(m.teamB.weighted)}</td>
+                  <td className={m.leader === "A" || m.leader === "B" ? "win" : "neutral"}>
+                    {m.leader === "A" ? m.teamA.name : m.leader === "B" ? m.teamB.name : m.leader === "TIE" ? "Tie" : "Pending"}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </section>
@@ -717,17 +741,17 @@ export default function Page() {
         .table-wrap {
           overflow-x: auto;
           margin-bottom: 36px;
-          border: 1px solid var(--border);
+          border: 1px solid var(--card-border);
           border-radius: 16px;
-          background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+          background: var(--card-surface);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
         }
         .table-title {
           font-family: var(--font-display), sans-serif;
           font-size: 13px;
           font-weight: 600;
           letter-spacing: 0.04em;
-          color: var(--gold);
+          color: var(--gold-deep);
           padding: 16px 18px 4px;
         }
         table {
@@ -740,27 +764,35 @@ export default function Page() {
         td {
           text-align: left;
           padding: 10px 14px;
-          border-bottom: 1px solid var(--gridline);
+          border-bottom: 1px solid var(--card-gridline);
           font-variant-numeric: tabular-nums;
           white-space: nowrap;
+          color: var(--card-text-primary);
         }
         th {
-          color: var(--text-muted);
+          color: var(--card-text-muted);
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           font-weight: 600;
         }
         .rank {
-          color: var(--gold);
+          color: var(--gold-deep);
           font-weight: 700;
         }
         .vs-cell {
-          color: var(--text-muted);
+          color: var(--card-text-muted);
           text-align: center;
         }
-        .win {
-          color: var(--gold);
+        td.win {
+          color: var(--win);
+          font-weight: 700;
+        }
+        td.lose {
+          color: var(--lose);
+        }
+        td.neutral {
+          color: var(--card-text-muted);
           font-weight: 700;
         }
         .grid {

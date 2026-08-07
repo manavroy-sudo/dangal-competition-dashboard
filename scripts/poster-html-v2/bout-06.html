@@ -1,0 +1,182 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    width: 1080px; height: 1350px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #fbf3e7;
+    position: relative;
+    overflow: hidden;
+    background: #100403;
+  }
+  .split-blue {
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, #0b2a55 0%, #123f7a 45%, #0a1830 100%);
+    clip-path: polygon(0 0, 62% 0, 38% 100%, 0 100%);
+  }
+  .split-red {
+    position:absolute; inset:0;
+    background: linear-gradient(225deg, #5a0f0f 0%, #7a1414 45%, #300808 100%);
+    clip-path: polygon(62% 0, 100% 0, 100% 100%, 38% 100%);
+  }
+  .seam {
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, transparent 48%, rgba(240,196,25,0.9) 49.5%, #fff 50%, rgba(240,196,25,0.9) 50.5%, transparent 52%);
+    clip-path: polygon(58% 0, 66% 0, 42% 100%, 34% 100%);
+    filter: drop-shadow(0 0 18px rgba(240,196,25,0.6));
+  }
+  .rays {
+    position:absolute; inset:0; opacity:0.18;
+    background: repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg 6deg, rgba(255,255,255,0.5) 6.3deg 6.6deg);
+  }
+  .top { position:relative; z-index:3; text-align:center; padding-top:50px; }
+  .pill {
+    display:inline-block; font-size:20px; font-weight:800; letter-spacing:0.12em;
+    color:#100403; background: linear-gradient(180deg,#ffe9a8,#d4af37);
+    padding:9px 28px; border-radius:999px; box-shadow:0 8px 20px rgba(0,0,0,0.5);
+  }
+  .bout-label { font-size:22px; color:#fbf3e7; letter-spacing:0.16em; margin-top:12px; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+
+  .arena { position:relative; z-index:2; display:flex; padding-top:30px; height:1060px; }
+  .side { width:540px; text-align:center; padding: 10px 34px 0; position:relative; }
+  .side-a { padding-right:56px; }
+  .side-b { padding-left:56px; }
+
+  .photo-wrap { position:relative; height:280px; display:flex; align-items:flex-start; justify-content:center; }
+  .side-a .photo-wrap { transform: rotate(-3deg); }
+  .side-b .photo-wrap { transform: rotate(3deg); }
+  .ph {
+    border-radius:18px; overflow:hidden; border-width:6px; border-style:solid;
+    box-shadow:0 16px 34px rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.4);
+    display:flex; align-items:center; justify-content:center; font-size:80px;
+  }
+  .ph img { width:100%; height:100%; object-fit:cover; }
+  .win .ph { box-shadow: 0 0 0 7px rgba(240,196,25,0.4), 0 16px 34px rgba(0,0,0,0.65); border-color:#f0c419 !important; }
+  .extra { position:absolute; bottom:-10px; right:20px; display:flex; gap:8px; }
+  .side-a .extra { right:auto; left:20px; }
+  .extra .ph { border-radius:50%; border-width:3px; }
+
+  .state-name { font-size:32px; font-weight:800; margin-top:14px; min-height:78px; line-height:1.15; }
+  .win .state-name { color:#f0c419; }
+  .leader-names { font-size:15px; color:#dcd0c2; opacity:0.85; margin:2px 0 16px; min-height:38px; }
+
+  .maps { display:flex; justify-content:center; gap:10px; height:150px; }
+  .map-box { background: rgba(0,0,0,0.25); border-radius:14px; padding:8px; border:1px solid rgba(255,255,255,0.12); }
+  .map-box.single { width:150px; height:150px; }
+  .map-box.multi { width:110px; height:150px; }
+  .map-pct { font-size:15px; font-weight:700; letter-spacing:0.04em; margin:8px 0 14px; }
+  .map-pct small { font-weight:600; opacity:0.7; letter-spacing:0.1em; margin-left:4px; }
+
+  .pct-row {
+    display:flex; justify-content:space-between; font-size:17px; color:#e2c9ab;
+    border-bottom:1px solid rgba(255,255,255,0.14); padding:7px 4px;
+  }
+  .pct-row b { color:#fbf3e7; font-variant-numeric: tabular-nums; }
+  .avg { margin-top:14px; font-size:40px; font-weight:800; }
+  .avg small { display:block; font-size:12px; letter-spacing:0.14em; color:#c9bba5; font-weight:600; margin-top:2px; }
+
+  .vs-medal {
+    position:absolute; left:50%; top:520px; transform:translate(-50%,-50%);
+    width:130px; height:130px; border-radius:50%; z-index:4;
+    background: linear-gradient(180deg,#f0c419,#d4af37);
+    color:#100403; font-size:38px; font-weight:900;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 0 0 10px rgba(16,4,3,0.5), 0 14px 34px rgba(0,0,0,0.6);
+  }
+
+  .banner { position:absolute; bottom:56px; left:0; right:0; text-align:center; z-index:3; }
+  .win-ribbon {
+    display:inline-block; font-size:30px; font-weight:800; color:#100403;
+    background: linear-gradient(180deg,#ffe9a8,#d4af37);
+    padding:16px 50px; border-radius:999px; box-shadow:0 12px 30px rgba(0,0,0,0.55);
+  }
+  .pending-ribbon {
+    display:inline-block; font-size:23px; font-weight:700; color:#fbf3e7;
+    background: rgba(0,0,0,0.4); border:2px solid rgba(255,255,255,0.25);
+    padding:14px 42px; border-radius:999px;
+  }
+</style></head>
+<body>
+  <div class="split-blue"></div>
+  <div class="split-red"></div>
+  <div class="rays"></div>
+  <div class="seam"></div>
+
+  <div class="top">
+    <span class="pill">⚔️ DANGAL COMPETITION</span>
+    <div class="bout-label">BOUT 06 &nbsp;·&nbsp; STATE VS STATE</div>
+  </div>
+
+  <div class="arena">
+    
+    <div class="side side-a ">
+      <div class="photo-wrap">
+        <div class="ph" style="width:230px;height:230px;border-color:#3987e5;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/n-nithin-yadav.jpeg" /></div>
+        
+      </div>
+      <div class="state-name">Karnataka</div>
+      <div class="leader-names">N Nithin Yadav</div>
+
+      <div class="maps"><div class="map-box single">
+  <svg viewBox="0 0 220 220" width="100%" height="100%">
+    <defs>
+      <clipPath id="clip-karnataka-3yyqsu"><path d="M166.14,199.64 L152.84,199.71 L152.97,197.43 L148.88,196.35 L144.92,198.90 L138.79,197.36 L136.13,195.08 L131.35,190.85 L131.35,190.85 L131.08,190.79 L115.53,189.78 L113.68,193.20 L105.70,189.71 L100.72,178.51 L100.38,178.71 L92.33,184.21 L86.74,181.33 L82.03,182.07 L81.83,179.79 L78.42,180.32 L72.89,176.63 L70.03,179.92 L72.14,184.41 L62.46,194.54 L58.50,194.21 L57.82,191.52 L60.14,188.64 L55.77,189.18 L53.93,187.16 L32.10,185.42 L29.10,188.98 L27.39,186.83 L28.08,182.60 L19.69,182.87 L15.87,188.37 L12.73,187.63 L13.00,187.16 L14.77,184.41 L15.18,183.74 L12.05,183.68 L11.77,183.61 L11.77,183.48 L10.00,179.45 L11.02,179.72 L11.50,177.31 L12.11,173.95 L12.86,170.20 L13.00,170.13 L18.73,168.05 L15.87,159.13 L25.69,157.85 L31.56,149.74 L26.85,144.44 L20.85,143.50 L21.19,134.65 L26.98,134.31 L28.42,139.14 L34.42,140.62 L34.49,140.55 L35.65,137.20 L39.95,137.53 L41.72,134.78 L50.93,135.72 L54.41,131.03 L58.09,131.23 L55.29,111.91 L57.14,106.68 L64.91,105.67 L63.48,96.82 L67.84,93.67 L58.36,89.58 L60.75,86.42 L59.11,83.74 L60.68,81.06 L62.86,81.73 L64.84,75.16 L72.82,74.75 L75.01,80.79 L79.58,81.26 L79.51,77.71 L81.62,76.43 L85.51,78.24 L87.97,82.87 L97.59,81.93 L97.59,81.86 L98.20,80.52 L98.88,78.98 L98.74,78.78 L94.92,73.41 L106.04,69.19 L105.43,64.69 L109.80,60.13 L110.82,55.24 L118.66,56.18 L115.87,48.87 L119.96,46.79 L122.07,42.16 L120.16,41.96 L121.32,38.67 L125.55,37.53 L125.55,37.53 L125.48,37.33 L123.37,32.63 L124.60,28.88 L129.51,26.87 L140.08,22.77 L141.51,20.29 L145.95,24.59 L150.18,21.03 L150.18,21.23 L151.61,31.23 L159.80,32.84 L160.07,33.04 L156.18,38.00 L157.27,42.29 L148.68,48.46 L148.54,48.60 L150.18,50.61 L159.11,51.82 L164.98,49.94 L165.12,54.90 L166.55,56.24 L169.82,59.46 L170.03,59.66 L170.16,59.60 L170.64,59.80 L174.73,58.12 L176.37,58.86 L180.26,55.77 L180.46,50.14 L188.44,53.83 L188.44,53.76 L190.56,55.17 L192.81,53.49 L192.88,53.49 L199.56,55.91 L198.61,57.11 L198.54,57.11 L192.67,63.62 L195.47,68.65 L190.97,73.61 L194.58,80.46 L197.79,81.80 L198.20,94.47 L198.20,94.67 L198.13,94.74 L192.88,97.69 L190.83,98.83 L187.69,102.39 L188.92,106.55 L194.45,107.42 L196.08,111.44 L199.70,109.77 L204.20,114.59 L208.57,114.19 L210.00,120.36 L209.93,120.43 L208.64,124.25 L206.11,123.78 L205.29,120.63 L203.52,122.24 L205.16,124.92 L202.29,126.40 L202.36,133.71 L195.61,132.97 L198.27,140.08 L193.63,139.61 L188.99,151.01 L183.67,149.40 L183.81,152.49 L179.17,158.06 L185.58,159.33 L189.13,162.62 L192.13,162.08 L191.99,165.70 L187.35,170.26 L182.37,170.40 L168.05,176.90 L167.16,185.89 L168.73,189.38 L168.66,189.65 L168.12,192.13 L166.34,199.64 L166.14,199.64 Z" /></clipPath>
+      <linearGradient id="grad-clip-karnataka-3yyqsu" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#3987e5" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#3987e5" stop-opacity="0.55"/>
+      </linearGradient>
+    </defs>
+    <g clip-path="url(#clip-karnataka-3yyqsu)">
+      <rect x="0" y="0" width="220" height="220" fill="#ffffff" opacity="0.06"/>
+      <rect x="0" y="213.84" width="220" height="6.16" fill="url(#grad-clip-karnataka-3yyqsu)"/>
+    </g>
+    <path d="M166.14,199.64 L152.84,199.71 L152.97,197.43 L148.88,196.35 L144.92,198.90 L138.79,197.36 L136.13,195.08 L131.35,190.85 L131.35,190.85 L131.08,190.79 L115.53,189.78 L113.68,193.20 L105.70,189.71 L100.72,178.51 L100.38,178.71 L92.33,184.21 L86.74,181.33 L82.03,182.07 L81.83,179.79 L78.42,180.32 L72.89,176.63 L70.03,179.92 L72.14,184.41 L62.46,194.54 L58.50,194.21 L57.82,191.52 L60.14,188.64 L55.77,189.18 L53.93,187.16 L32.10,185.42 L29.10,188.98 L27.39,186.83 L28.08,182.60 L19.69,182.87 L15.87,188.37 L12.73,187.63 L13.00,187.16 L14.77,184.41 L15.18,183.74 L12.05,183.68 L11.77,183.61 L11.77,183.48 L10.00,179.45 L11.02,179.72 L11.50,177.31 L12.11,173.95 L12.86,170.20 L13.00,170.13 L18.73,168.05 L15.87,159.13 L25.69,157.85 L31.56,149.74 L26.85,144.44 L20.85,143.50 L21.19,134.65 L26.98,134.31 L28.42,139.14 L34.42,140.62 L34.49,140.55 L35.65,137.20 L39.95,137.53 L41.72,134.78 L50.93,135.72 L54.41,131.03 L58.09,131.23 L55.29,111.91 L57.14,106.68 L64.91,105.67 L63.48,96.82 L67.84,93.67 L58.36,89.58 L60.75,86.42 L59.11,83.74 L60.68,81.06 L62.86,81.73 L64.84,75.16 L72.82,74.75 L75.01,80.79 L79.58,81.26 L79.51,77.71 L81.62,76.43 L85.51,78.24 L87.97,82.87 L97.59,81.93 L97.59,81.86 L98.20,80.52 L98.88,78.98 L98.74,78.78 L94.92,73.41 L106.04,69.19 L105.43,64.69 L109.80,60.13 L110.82,55.24 L118.66,56.18 L115.87,48.87 L119.96,46.79 L122.07,42.16 L120.16,41.96 L121.32,38.67 L125.55,37.53 L125.55,37.53 L125.48,37.33 L123.37,32.63 L124.60,28.88 L129.51,26.87 L140.08,22.77 L141.51,20.29 L145.95,24.59 L150.18,21.03 L150.18,21.23 L151.61,31.23 L159.80,32.84 L160.07,33.04 L156.18,38.00 L157.27,42.29 L148.68,48.46 L148.54,48.60 L150.18,50.61 L159.11,51.82 L164.98,49.94 L165.12,54.90 L166.55,56.24 L169.82,59.46 L170.03,59.66 L170.16,59.60 L170.64,59.80 L174.73,58.12 L176.37,58.86 L180.26,55.77 L180.46,50.14 L188.44,53.83 L188.44,53.76 L190.56,55.17 L192.81,53.49 L192.88,53.49 L199.56,55.91 L198.61,57.11 L198.54,57.11 L192.67,63.62 L195.47,68.65 L190.97,73.61 L194.58,80.46 L197.79,81.80 L198.20,94.47 L198.20,94.67 L198.13,94.74 L192.88,97.69 L190.83,98.83 L187.69,102.39 L188.92,106.55 L194.45,107.42 L196.08,111.44 L199.70,109.77 L204.20,114.59 L208.57,114.19 L210.00,120.36 L209.93,120.43 L208.64,124.25 L206.11,123.78 L205.29,120.63 L203.52,122.24 L205.16,124.92 L202.29,126.40 L202.36,133.71 L195.61,132.97 L198.27,140.08 L193.63,139.61 L188.99,151.01 L183.67,149.40 L183.81,152.49 L179.17,158.06 L185.58,159.33 L189.13,162.62 L192.13,162.08 L191.99,165.70 L187.35,170.26 L182.37,170.40 L168.05,176.90 L167.16,185.89 L168.73,189.38 L168.66,189.65 L168.12,192.13 L166.34,199.64 L166.14,199.64 Z" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5"/>
+  </svg></div></div>
+      <div class="map-pct" style="color:#3987e5;">2.8% <small>COVERAGE</small></div>
+
+      <div class="pct-row"><span>Onboarding</span><b>1.6%</b></div>
+      <div class="pct-row"><span>Activation</span><b>3.9%</b></div>
+      <div class="avg" style="color:#fbf3e7;">2.8%<small>AVG SCORE</small></div>
+    </div>
+  
+    
+    <div class="side side-b win">
+      <div class="photo-wrap">
+        <div class="ph" style="width:230px;height:230px;border-color:#ef4a44;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/shailendra-mahulkar.jpg" /></div>
+        
+      </div>
+      <div class="state-name">ROM 2</div>
+      <div class="leader-names">Shailendra Mahulkar</div>
+
+      <div class="maps"><div class="map-box single">
+  <svg viewBox="0 0 220 220" width="100%" height="100%">
+    <defs>
+      <clipPath id="clip-maharashtra-iu5yfp"><path d="M155.16,176.57 L146.18,175.37 L141.65,179.03 L140.78,179.16 L129.09,176.23 L124.27,195.28 L122.38,198.54 L118.65,198.68 L116.90,205.00 L112.37,205.34 L110.69,210.00 L97.62,205.60 L94.41,202.14 L89.37,204.07 L84.48,201.87 L80.25,202.61 L73.09,198.34 L67.69,201.28 L64.55,207.54 L64.11,206.07 L59.44,206.14 L57.76,205.54 L57.03,198.15 L57.17,197.75 L57.68,196.68 L59.73,192.48 L62.94,193.55 L64.11,187.69 L60.90,188.22 L60.24,190.95 L52.35,190.09 L50.16,192.22 L43.23,192.48 L45.64,190.75 L48.12,183.03 L36.73,185.82 L37.38,182.16 L33.37,184.23 L34.61,179.83 L31.98,177.37 L31.69,177.10 L32.20,176.17 L32.49,175.43 L32.93,174.57 L35.27,175.90 L40.30,176.70 L42.86,181.83 L44.61,180.43 L45.49,176.43 L43.81,175.37 L33.66,173.30 L38.41,168.44 L42.64,169.57 L43.30,164.65 L45.27,163.91 L52.35,167.18 L52.50,162.58 L48.85,161.12 L48.56,158.78 L45.49,158.85 L50.31,153.52 L49.07,148.46 L61.84,150.33 L68.93,146.73 L73.89,150.19 L73.16,148.33 L75.72,148.66 L78.05,142.47 L82.14,141.60 L81.12,133.08 L74.77,132.94 L77.62,130.48 L75.94,127.48 L78.79,124.35 L75.57,123.09 L76.67,119.49 L73.16,118.56 L78.42,109.63 L75.72,107.84 L76.23,101.71 L74.18,98.64 L66.37,96.31 L65.86,92.98 L61.99,95.45 L59.14,92.12 L54.11,92.32 L48.48,87.66 L40.09,88.26 L34.39,88.72 L33.95,88.85 L34.10,92.18 L26.94,93.38 L27.23,92.92 L30.37,88.72 L28.91,87.26 L33.22,88.52 L33.51,87.19 L25.56,84.06 L28.11,81.60 L26.14,79.66 L27.89,76.53 L23.22,74.27 L23.22,67.28 L20.52,66.41 L19.71,63.15 L36.87,52.82 L38.84,47.16 L46.15,39.64 L44.98,33.98 L44.61,32.38 L47.61,26.52 L55.13,25.85 L61.41,30.91 L68.05,26.25 L76.01,26.18 L81.92,19.39 L84.99,18.72 L86.09,15.06 L92.80,16.06 L102.88,10.00 L106.46,13.06 L115.73,13.60 L118.58,18.06 L121.43,18.79 L122.16,22.32 L126.68,22.19 L130.55,26.58 L128.73,27.98 L138.00,32.84 L139.61,39.77 L147.42,49.89 L142.09,56.49 L145.38,62.95 L152.75,63.81 L154.58,57.55 L168.89,59.22 L172.03,64.15 L177.58,66.81 L176.92,69.27 L181.52,69.67 L183.64,73.07 L188.02,74.40 L196.64,71.54 L200.29,75.73 L199.92,78.73 L196.20,80.40 L192.62,88.45 L186.49,93.52 L181.08,94.45 L175.46,98.51 L169.33,97.85 L166.41,102.37 L155.96,104.04 L152.02,114.90 L154.72,116.29 L150.85,120.02 L153.63,131.81 L147.86,138.01 L151.80,140.94 L155.89,154.19 L172.69,152.99 L175.83,175.83 L167.87,173.44 L155.16,176.57 Z" /></clipPath>
+      <linearGradient id="grad-clip-maharashtra-iu5yfp" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#ef4a44" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#ef4a44" stop-opacity="0.55"/>
+      </linearGradient>
+    </defs>
+    <g clip-path="url(#clip-maharashtra-iu5yfp)">
+      <rect x="0" y="0" width="220" height="220" fill="#ffffff" opacity="0.06"/>
+      <rect x="0" y="213.18" width="220" height="6.82" fill="url(#grad-clip-maharashtra-iu5yfp)"/>
+    </g>
+    <path d="M155.16,176.57 L146.18,175.37 L141.65,179.03 L140.78,179.16 L129.09,176.23 L124.27,195.28 L122.38,198.54 L118.65,198.68 L116.90,205.00 L112.37,205.34 L110.69,210.00 L97.62,205.60 L94.41,202.14 L89.37,204.07 L84.48,201.87 L80.25,202.61 L73.09,198.34 L67.69,201.28 L64.55,207.54 L64.11,206.07 L59.44,206.14 L57.76,205.54 L57.03,198.15 L57.17,197.75 L57.68,196.68 L59.73,192.48 L62.94,193.55 L64.11,187.69 L60.90,188.22 L60.24,190.95 L52.35,190.09 L50.16,192.22 L43.23,192.48 L45.64,190.75 L48.12,183.03 L36.73,185.82 L37.38,182.16 L33.37,184.23 L34.61,179.83 L31.98,177.37 L31.69,177.10 L32.20,176.17 L32.49,175.43 L32.93,174.57 L35.27,175.90 L40.30,176.70 L42.86,181.83 L44.61,180.43 L45.49,176.43 L43.81,175.37 L33.66,173.30 L38.41,168.44 L42.64,169.57 L43.30,164.65 L45.27,163.91 L52.35,167.18 L52.50,162.58 L48.85,161.12 L48.56,158.78 L45.49,158.85 L50.31,153.52 L49.07,148.46 L61.84,150.33 L68.93,146.73 L73.89,150.19 L73.16,148.33 L75.72,148.66 L78.05,142.47 L82.14,141.60 L81.12,133.08 L74.77,132.94 L77.62,130.48 L75.94,127.48 L78.79,124.35 L75.57,123.09 L76.67,119.49 L73.16,118.56 L78.42,109.63 L75.72,107.84 L76.23,101.71 L74.18,98.64 L66.37,96.31 L65.86,92.98 L61.99,95.45 L59.14,92.12 L54.11,92.32 L48.48,87.66 L40.09,88.26 L34.39,88.72 L33.95,88.85 L34.10,92.18 L26.94,93.38 L27.23,92.92 L30.37,88.72 L28.91,87.26 L33.22,88.52 L33.51,87.19 L25.56,84.06 L28.11,81.60 L26.14,79.66 L27.89,76.53 L23.22,74.27 L23.22,67.28 L20.52,66.41 L19.71,63.15 L36.87,52.82 L38.84,47.16 L46.15,39.64 L44.98,33.98 L44.61,32.38 L47.61,26.52 L55.13,25.85 L61.41,30.91 L68.05,26.25 L76.01,26.18 L81.92,19.39 L84.99,18.72 L86.09,15.06 L92.80,16.06 L102.88,10.00 L106.46,13.06 L115.73,13.60 L118.58,18.06 L121.43,18.79 L122.16,22.32 L126.68,22.19 L130.55,26.58 L128.73,27.98 L138.00,32.84 L139.61,39.77 L147.42,49.89 L142.09,56.49 L145.38,62.95 L152.75,63.81 L154.58,57.55 L168.89,59.22 L172.03,64.15 L177.58,66.81 L176.92,69.27 L181.52,69.67 L183.64,73.07 L188.02,74.40 L196.64,71.54 L200.29,75.73 L199.92,78.73 L196.20,80.40 L192.62,88.45 L186.49,93.52 L181.08,94.45 L175.46,98.51 L169.33,97.85 L166.41,102.37 L155.96,104.04 L152.02,114.90 L154.72,116.29 L150.85,120.02 L153.63,131.81 L147.86,138.01 L151.80,140.94 L155.89,154.19 L172.69,152.99 L175.83,175.83 L167.87,173.44 L155.16,176.57 Z" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5"/>
+  </svg></div></div>
+      <div class="map-pct" style="color:#ef4a44;">3.1% <small>COVERAGE</small></div>
+
+      <div class="pct-row"><span>Onboarding</span><b>5.9%</b></div>
+      <div class="pct-row"><span>Activation</span><b>0.3%</b></div>
+      <div class="avg" style="color:#f0c419;">3.1%<small>AVG SCORE</small></div>
+    </div>
+  
+  </div>
+
+  <div class="vs-medal">VS</div>
+
+  <div class="banner">
+    <span class="win-ribbon">🏆 ROM 2 LEADS</span>
+  </div>
+</body></html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    width: 1080px; height: 1350px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background:
+      radial-gradient(900px 700px at 50% 20%, rgba(240,196,25,0.18), transparent 60%),
+      radial-gradient(1000px 900px at 50% 60%, #2c0f0a, #100403 75%);
+    color: #fbf3e7;
+    position: relative;
+    overflow: hidden;
+  }
+  .ring {
+    position:absolute; left:50%; top:330px; width:760px; height:760px;
+    border-radius:50%; border:3px dashed rgba(212,175,55,0.22); transform:translateX(-50%);
+  }
+  .ring2 {
+    position:absolute; left:50%; top:390px; width:640px; height:640px;
+    border-radius:50%; border:2px solid rgba(212,175,55,0.14); transform:translateX(-50%);
+  }
+  .top { text-align:center; padding-top:56px; position:relative; z-index:2; }
+  .pill {
+    display:inline-block; font-size:20px; font-weight:700; letter-spacing:0.12em;
+    color:#f0c419; background:rgba(240,196,25,0.12); border:2px solid rgba(240,196,25,0.4);
+    padding:8px 26px; border-radius:999px; margin-bottom:18px;
+  }
+  h1 {
+    font-size:64px; font-weight:800; letter-spacing:0.02em;
+    background: linear-gradient(180deg, #ffe9a8, #d4af37);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow: 0 8px 30px rgba(240,196,25,0.3);
+  }
+  .bout-label { font-size:24px; color:#e2c9ab; letter-spacing:0.16em; margin-top:10px; font-weight:600; }
+  .battle {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding: 40px 70px 0; position:relative; z-index:2;
+  }
+  .side { width: 420px; text-align:center; position:relative; }
+  .ph {
+    border-radius:50%; overflow:hidden; margin:0 auto 18px;
+    border:5px solid #d4af37; box-shadow:0 10px 30px rgba(0,0,0,0.55);
+    background: radial-gradient(circle at 35% 30%, #351a14, #100403);
+    display:flex; align-items:center; justify-content:center; font-size:70px;
+  }
+  .ph img { width:100%; height:100%; object-fit:cover; }
+  .extra { display:flex; justify-content:center; gap:10px; margin:-8px 0 14px; }
+  .extra .ph { margin:0; border-width:3px; }
+  .side.win .ph { border-color:#f0c419; box-shadow:0 0 0 6px rgba(240,196,25,0.25), 0 10px 30px rgba(0,0,0,0.6); }
+  .state-name { font-size:30px; font-weight:800; line-height:1.15; min-height:76px; }
+  .side.win .state-name { color:#f0c419; }
+  .leader-names { font-size:17px; color:#c3ab8f; margin:6px 0 18px; min-height:44px; }
+  .pct-row {
+    display:flex; justify-content:space-between; font-size:19px; color:#e2c9ab;
+    border-bottom:1px solid rgba(212,175,55,0.18); padding:8px 6px;
+  }
+  .pct-row b { color:#fbf3e7; font-variant-numeric: tabular-nums; }
+  .avg {
+    margin-top:16px; font-size:44px; font-weight:800; color:#fbf3e7;
+  }
+  .side.win .avg { color:#f0c419; text-shadow:0 0 20px rgba(240,196,25,0.5); }
+  .avg small {
+    display:block; font-size:13px; letter-spacing:0.14em; color:#a9846a; font-weight:600; margin-top:2px;
+  }
+  .vs {
+    width:120px; height:120px; border-radius:50%; margin-top:70px;
+    background: linear-gradient(180deg,#f0c419,#d4af37);
+    color:#100403; font-size:34px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 8px rgba(212,175,55,0.15), 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .banner {
+    position:absolute; bottom:70px; left:0; right:0; text-align:center; z-index:2;
+  }
+  .banner .win-ribbon {
+    display:inline-block; font-size:30px; font-weight:800; color:#100403;
+    background: linear-gradient(180deg,#ffe9a8,#d4af37);
+    padding:16px 48px; border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+  .banner .pending-ribbon {
+    display:inline-block; font-size:24px; font-weight:700; color:#e2c9ab;
+    background: rgba(255,255,255,0.06); border:2px solid rgba(212,175,55,0.3);
+    padding:14px 40px; border-radius:999px;
+  }
+  .flag { position:absolute; top:0; width:0; height:0; border-style:solid; }
+  .flag-a { left:50px; border-width:0 14px 22px 14px; border-color: transparent transparent #3987e5 transparent; }
+  .flag-b { right:50px; border-width:0 14px 22px 14px; border-color: transparent transparent #ef4a44 transparent; }
+</style></head>
+<body>
+  <div class="ring"></div>
+  <div class="ring2"></div>
+  <div class="top">
+    <span class="pill">⚔️ DANGAL COMPETITION</span>
+    <div class="bout-label">BOUT 03 · STATE VS STATE</div>
+  </div>
+  <div class="battle">
+    <span class="flag flag-a"></span>
+    <span class="flag flag-b"></span>
+    
+    <div class="side win">
+      <div class="ph" style="width:190px;height:190px;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/birendra.jpg" /></div>
+      <div class="extra"><div class="ph" style="width:56px;height:56px;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/pankaj.jpg" /></div><div class="ph" style="width:56px;height:56px;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/vishal.jpeg" /></div></div>
+      <div class="state-name">Bihar</div>
+      <div class="leader-names">Birendra &amp; Pankaj &amp; Vishal</div>
+      <div class="pct-row"><span>Onboarding</span><b>17.5%</b></div>
+      <div class="pct-row"><span>Activation</span><b>3.3%</b></div>
+      <div class="avg">10.4%<small>AVG SCORE</small></div>
+    </div>
+  
+    <div class="vs">VS</div>
+    
+    <div class="side ">
+      <div class="ph" style="width:190px;height:190px;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/bimal.jpeg" /></div>
+      <div class="extra"><div class="ph" style="width:56px;height:56px;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/gagandeep-singh.jpeg" /></div></div>
+      <div class="state-name">Punjab</div>
+      <div class="leader-names">Bimal &amp; Gagandeep Singh</div>
+      <div class="pct-row"><span>Onboarding</span><b>7.4%</b></div>
+      <div class="pct-row"><span>Activation</span><b>7.9%</b></div>
+      <div class="avg">7.7%<small>AVG SCORE</small></div>
+    </div>
+  
+  </div>
+  <div class="banner">
+    <span class="win-ribbon">🏆 Bihar LEADS</span>
+  </div>
+</body></html>

@@ -1,0 +1,182 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    width: 1080px; height: 1350px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #fbf3e7;
+    position: relative;
+    overflow: hidden;
+    background: #100403;
+  }
+  .split-blue {
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, #0b2a55 0%, #123f7a 45%, #0a1830 100%);
+    clip-path: polygon(0 0, 62% 0, 38% 100%, 0 100%);
+  }
+  .split-red {
+    position:absolute; inset:0;
+    background: linear-gradient(225deg, #5a0f0f 0%, #7a1414 45%, #300808 100%);
+    clip-path: polygon(62% 0, 100% 0, 100% 100%, 38% 100%);
+  }
+  .seam {
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, transparent 48%, rgba(240,196,25,0.9) 49.5%, #fff 50%, rgba(240,196,25,0.9) 50.5%, transparent 52%);
+    clip-path: polygon(58% 0, 66% 0, 42% 100%, 34% 100%);
+    filter: drop-shadow(0 0 18px rgba(240,196,25,0.6));
+  }
+  .rays {
+    position:absolute; inset:0; opacity:0.18;
+    background: repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg 6deg, rgba(255,255,255,0.5) 6.3deg 6.6deg);
+  }
+  .top { position:relative; z-index:3; text-align:center; padding-top:50px; }
+  .pill {
+    display:inline-block; font-size:20px; font-weight:800; letter-spacing:0.12em;
+    color:#100403; background: linear-gradient(180deg,#ffe9a8,#d4af37);
+    padding:9px 28px; border-radius:999px; box-shadow:0 8px 20px rgba(0,0,0,0.5);
+  }
+  .bout-label { font-size:22px; color:#fbf3e7; letter-spacing:0.16em; margin-top:12px; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+
+  .arena { position:relative; z-index:2; display:flex; padding-top:30px; height:1060px; }
+  .side { width:540px; text-align:center; padding: 10px 34px 0; position:relative; }
+  .side-a { padding-right:56px; }
+  .side-b { padding-left:56px; }
+
+  .photo-wrap { position:relative; height:280px; display:flex; align-items:flex-start; justify-content:center; }
+  .side-a .photo-wrap { transform: rotate(-3deg); }
+  .side-b .photo-wrap { transform: rotate(3deg); }
+  .ph {
+    border-radius:18px; overflow:hidden; border-width:6px; border-style:solid;
+    box-shadow:0 16px 34px rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.4);
+    display:flex; align-items:center; justify-content:center; font-size:80px;
+  }
+  .ph img { width:100%; height:100%; object-fit:cover; }
+  .win .ph { box-shadow: 0 0 0 7px rgba(240,196,25,0.4), 0 16px 34px rgba(0,0,0,0.65); border-color:#f0c419 !important; }
+  .extra { position:absolute; bottom:-10px; right:20px; display:flex; gap:8px; }
+  .side-a .extra { right:auto; left:20px; }
+  .extra .ph { border-radius:50%; border-width:3px; }
+
+  .state-name { font-size:32px; font-weight:800; margin-top:14px; min-height:78px; line-height:1.15; }
+  .win .state-name { color:#f0c419; }
+  .leader-names { font-size:15px; color:#dcd0c2; opacity:0.85; margin:2px 0 16px; min-height:38px; }
+
+  .maps { display:flex; justify-content:center; gap:10px; height:150px; }
+  .map-box { background: rgba(0,0,0,0.25); border-radius:14px; padding:8px; border:1px solid rgba(255,255,255,0.12); }
+  .map-box.single { width:150px; height:150px; }
+  .map-box.multi { width:110px; height:150px; }
+  .map-pct { font-size:15px; font-weight:700; letter-spacing:0.04em; margin:8px 0 14px; }
+  .map-pct small { font-weight:600; opacity:0.7; letter-spacing:0.1em; margin-left:4px; }
+
+  .pct-row {
+    display:flex; justify-content:space-between; font-size:17px; color:#e2c9ab;
+    border-bottom:1px solid rgba(255,255,255,0.14); padding:7px 4px;
+  }
+  .pct-row b { color:#fbf3e7; font-variant-numeric: tabular-nums; }
+  .avg { margin-top:14px; font-size:40px; font-weight:800; }
+  .avg small { display:block; font-size:12px; letter-spacing:0.14em; color:#c9bba5; font-weight:600; margin-top:2px; }
+
+  .vs-medal {
+    position:absolute; left:50%; top:520px; transform:translate(-50%,-50%);
+    width:130px; height:130px; border-radius:50%; z-index:4;
+    background: linear-gradient(180deg,#f0c419,#d4af37);
+    color:#100403; font-size:38px; font-weight:900;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 0 0 10px rgba(16,4,3,0.5), 0 14px 34px rgba(0,0,0,0.6);
+  }
+
+  .banner { position:absolute; bottom:56px; left:0; right:0; text-align:center; z-index:3; }
+  .win-ribbon {
+    display:inline-block; font-size:30px; font-weight:800; color:#100403;
+    background: linear-gradient(180deg,#ffe9a8,#d4af37);
+    padding:16px 50px; border-radius:999px; box-shadow:0 12px 30px rgba(0,0,0,0.55);
+  }
+  .pending-ribbon {
+    display:inline-block; font-size:23px; font-weight:700; color:#fbf3e7;
+    background: rgba(0,0,0,0.4); border:2px solid rgba(255,255,255,0.25);
+    padding:14px 42px; border-radius:999px;
+  }
+</style></head>
+<body>
+  <div class="split-blue"></div>
+  <div class="split-red"></div>
+  <div class="rays"></div>
+  <div class="seam"></div>
+
+  <div class="top">
+    <span class="pill">⚔️ DANGAL COMPETITION</span>
+    <div class="bout-label">BOUT 04 &nbsp;·&nbsp; STATE VS STATE</div>
+  </div>
+
+  <div class="arena">
+    
+    <div class="side side-a win">
+      <div class="photo-wrap">
+        <div class="ph" style="width:230px;height:230px;border-color:#3987e5;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/pankaj.jpg" /></div>
+        
+      </div>
+      <div class="state-name">Jharkhand</div>
+      <div class="leader-names">Pankaj</div>
+
+      <div class="maps"><div class="map-box single">
+  <svg viewBox="0 0 220 220" width="100%" height="100%">
+    <defs>
+      <clipPath id="clip-jharkhand-7d17in"><path d="M151.98,200.79 L152.79,201.34 L154.12,208.18 L154.12,208.36 L142.40,206.17 L138.43,210.00 L135.47,198.79 L125.49,199.70 L121.31,197.06 L124.67,194.41 L122.84,193.23 L118.86,194.23 L112.45,205.35 L111.63,201.70 L103.68,201.25 L98.69,194.14 L96.35,195.78 L93.60,192.68 L79.74,190.13 L75.66,185.30 L71.39,186.03 L75.56,181.56 L83.10,185.21 L78.21,180.56 L66.90,180.56 L60.79,174.45 L55.90,175.82 L57.12,182.65 L47.75,183.75 L47.65,183.66 L45.51,183.02 L37.56,173.35 L38.37,164.79 L30.83,162.96 L34.60,157.95 L29.92,154.39 L34.50,150.57 L30.33,139.35 L37.66,127.41 L31.45,122.67 L31.45,122.58 L44.59,113.83 L48.05,107.72 L46.12,103.35 L51.42,101.34 L36.03,87.03 L44.59,76.00 L37.87,58.86 L36.54,47.37 L36.44,46.28 L37.56,44.00 L44.90,38.17 L40.82,26.32 L42.76,24.31 L45.30,27.96 L58.34,31.51 L61.09,15.56 L67.21,15.01 L71.39,10.00 L73.73,12.28 L71.59,15.65 L71.59,15.83 L76.28,19.02 L79.84,21.30 L80.05,21.49 L80.25,21.39 L85.96,19.30 L93.60,23.13 L105.31,21.85 L103.17,23.58 L107.35,24.22 L105.72,30.33 L111.43,33.52 L111.32,38.90 L111.43,38.90 L132.72,41.08 L132.92,74.81 L139.65,83.02 L138.12,92.59 L188.15,128.60 L190.08,145.00 L168.07,165.88 L171.03,176.00 L161.86,175.72 L161.25,175.72 L165.22,183.56 L161.04,186.75 L161.25,191.22 L156.56,195.32 L150.96,194.05 L150.45,187.03 L150.45,186.66 L149.53,188.58 L145.76,196.14 L145.15,197.51 L151.98,200.79 Z" /></clipPath>
+      <linearGradient id="grad-clip-jharkhand-7d17in" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#3987e5" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#3987e5" stop-opacity="0.55"/>
+      </linearGradient>
+    </defs>
+    <g clip-path="url(#clip-jharkhand-7d17in)">
+      <rect x="0" y="0" width="220" height="220" fill="#ffffff" opacity="0.06"/>
+      <rect x="0" y="200.42" width="220" height="19.58" fill="url(#grad-clip-jharkhand-7d17in)"/>
+    </g>
+    <path d="M151.98,200.79 L152.79,201.34 L154.12,208.18 L154.12,208.36 L142.40,206.17 L138.43,210.00 L135.47,198.79 L125.49,199.70 L121.31,197.06 L124.67,194.41 L122.84,193.23 L118.86,194.23 L112.45,205.35 L111.63,201.70 L103.68,201.25 L98.69,194.14 L96.35,195.78 L93.60,192.68 L79.74,190.13 L75.66,185.30 L71.39,186.03 L75.56,181.56 L83.10,185.21 L78.21,180.56 L66.90,180.56 L60.79,174.45 L55.90,175.82 L57.12,182.65 L47.75,183.75 L47.65,183.66 L45.51,183.02 L37.56,173.35 L38.37,164.79 L30.83,162.96 L34.60,157.95 L29.92,154.39 L34.50,150.57 L30.33,139.35 L37.66,127.41 L31.45,122.67 L31.45,122.58 L44.59,113.83 L48.05,107.72 L46.12,103.35 L51.42,101.34 L36.03,87.03 L44.59,76.00 L37.87,58.86 L36.54,47.37 L36.44,46.28 L37.56,44.00 L44.90,38.17 L40.82,26.32 L42.76,24.31 L45.30,27.96 L58.34,31.51 L61.09,15.56 L67.21,15.01 L71.39,10.00 L73.73,12.28 L71.59,15.65 L71.59,15.83 L76.28,19.02 L79.84,21.30 L80.05,21.49 L80.25,21.39 L85.96,19.30 L93.60,23.13 L105.31,21.85 L103.17,23.58 L107.35,24.22 L105.72,30.33 L111.43,33.52 L111.32,38.90 L111.43,38.90 L132.72,41.08 L132.92,74.81 L139.65,83.02 L138.12,92.59 L188.15,128.60 L190.08,145.00 L168.07,165.88 L171.03,176.00 L161.86,175.72 L161.25,175.72 L165.22,183.56 L161.04,186.75 L161.25,191.22 L156.56,195.32 L150.96,194.05 L150.45,187.03 L150.45,186.66 L149.53,188.58 L145.76,196.14 L145.15,197.51 L151.98,200.79 Z" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5"/>
+  </svg></div></div>
+      <div class="map-pct" style="color:#3987e5;">8.9% <small>COVERAGE</small></div>
+
+      <div class="pct-row"><span>Onboarding</span><b>14.3%</b></div>
+      <div class="pct-row"><span>Activation</span><b>3.4%</b></div>
+      <div class="avg" style="color:#f0c419;">8.9%<small>AVG SCORE</small></div>
+    </div>
+  
+    
+    <div class="side side-b ">
+      <div class="photo-wrap">
+        <div class="ph" style="width:230px;height:230px;border-color:#ef4a44;"><img src="file:///C:/Users/Manav Roy/dangal-dashboard/public/leaders/vinothbabu-nagarajan.jpg" /></div>
+        
+      </div>
+      <div class="state-name">Tamil Nadu</div>
+      <div class="leader-names">Vinothbabu Nagarajan</div>
+
+      <div class="maps"><div class="map-box single">
+  <svg viewBox="0 0 220 220" width="100%" height="100%">
+    <defs>
+      <clipPath id="clip-tamil-nadu-n138pe"><path d="M201.44,130.87 L190.02,130.87 L182.78,134.04 L179.59,147.07 L180.03,153.32 L168.84,151.31 L160.38,150.99 L159.84,154.80 L153.03,154.06 L149.19,150.14 L143.70,148.98 L132.83,151.62 L133.82,156.18 L124.16,168.15 L117.03,167.41 L111.10,164.76 L110.55,156.92 L105.17,153.21 L104.84,147.18 L97.05,148.13 L95.51,145.48 L95.18,126.31 L87.28,127.79 L86.73,124.40 L78.50,120.27 L75.31,130.34 L63.68,131.92 L53.91,130.76 L47.21,131.50 L46.00,137.54 L41.39,140.19 L38.21,132.14 L32.06,138.17 L32.50,142.62 L19.55,146.44 L13.62,142.09 L10.00,134.68 L14.83,136.69 L18.45,133.20 L25.26,133.20 L23.50,126.84 L30.31,121.54 L37.77,122.18 L41.94,116.99 L41.83,112.86 L35.25,112.01 L34.37,101.31 L31.51,95.60 L49.74,92.84 L57.64,94.01 L58.19,106.50 L64.56,109.05 L70.59,103.54 L82.89,105.02 L85.30,111.80 L91.78,116.99 L94.41,113.18 L99.57,118.69 L106.16,112.22 L94.85,105.87 L101.11,98.67 L105.50,102.48 L110.33,97.82 L131.84,91.57 L136.89,86.38 L133.38,77.80 L139.75,76.85 L139.53,69.43 L146.22,67.74 L149.85,61.07 L150.18,56.30 L159.29,58.63 L159.51,65.73 L172.13,65.30 L187.28,66.47 L190.35,68.80 L194.52,51.85 L200.01,64.46 L206.16,73.99 L210.00,98.46 L209.78,105.13 L204.95,122.71 L201.44,130.87 Z" /></clipPath>
+      <linearGradient id="grad-clip-tamil-nadu-n138pe" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#ef4a44" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#ef4a44" stop-opacity="0.55"/>
+      </linearGradient>
+    </defs>
+    <g clip-path="url(#clip-tamil-nadu-n138pe)">
+      <rect x="0" y="0" width="220" height="220" fill="#ffffff" opacity="0.06"/>
+      <rect x="0" y="210.98" width="220" height="9.02" fill="url(#grad-clip-tamil-nadu-n138pe)"/>
+    </g>
+    <path d="M201.44,130.87 L190.02,130.87 L182.78,134.04 L179.59,147.07 L180.03,153.32 L168.84,151.31 L160.38,150.99 L159.84,154.80 L153.03,154.06 L149.19,150.14 L143.70,148.98 L132.83,151.62 L133.82,156.18 L124.16,168.15 L117.03,167.41 L111.10,164.76 L110.55,156.92 L105.17,153.21 L104.84,147.18 L97.05,148.13 L95.51,145.48 L95.18,126.31 L87.28,127.79 L86.73,124.40 L78.50,120.27 L75.31,130.34 L63.68,131.92 L53.91,130.76 L47.21,131.50 L46.00,137.54 L41.39,140.19 L38.21,132.14 L32.06,138.17 L32.50,142.62 L19.55,146.44 L13.62,142.09 L10.00,134.68 L14.83,136.69 L18.45,133.20 L25.26,133.20 L23.50,126.84 L30.31,121.54 L37.77,122.18 L41.94,116.99 L41.83,112.86 L35.25,112.01 L34.37,101.31 L31.51,95.60 L49.74,92.84 L57.64,94.01 L58.19,106.50 L64.56,109.05 L70.59,103.54 L82.89,105.02 L85.30,111.80 L91.78,116.99 L94.41,113.18 L99.57,118.69 L106.16,112.22 L94.85,105.87 L101.11,98.67 L105.50,102.48 L110.33,97.82 L131.84,91.57 L136.89,86.38 L133.38,77.80 L139.75,76.85 L139.53,69.43 L146.22,67.74 L149.85,61.07 L150.18,56.30 L159.29,58.63 L159.51,65.73 L172.13,65.30 L187.28,66.47 L190.35,68.80 L194.52,51.85 L200.01,64.46 L206.16,73.99 L210.00,98.46 L209.78,105.13 L204.95,122.71 L201.44,130.87 Z" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5"/>
+  </svg></div></div>
+      <div class="map-pct" style="color:#ef4a44;">4.1% <small>COVERAGE</small></div>
+
+      <div class="pct-row"><span>Onboarding</span><b>5.4%</b></div>
+      <div class="pct-row"><span>Activation</span><b>2.8%</b></div>
+      <div class="avg" style="color:#fbf3e7;">4.1%<small>AVG SCORE</small></div>
+    </div>
+  
+  </div>
+
+  <div class="vs-medal">VS</div>
+
+  <div class="banner">
+    <span class="win-ribbon">🏆 Jharkhand LEADS</span>
+  </div>
+</body></html>
