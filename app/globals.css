@@ -39,7 +39,11 @@ body {
   background-image:
     radial-gradient(1100px 620px at 50% -8%, rgba(240, 196, 25, 0.16), transparent 60%),
     radial-gradient(900px 700px at 50% 40%, var(--arena-bg-2), var(--arena-bg-3) 70%),
-    repeating-radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 2px, transparent 4px);
+    repeating-radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 2px, transparent 4px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900'%3E%3Ccircle cx='450' cy='430' r='360' fill='none' stroke='%23d4af37' stroke-width='3' stroke-dasharray='2 14' opacity='0.10'/%3E%3Ccircle cx='450' cy='430' r='300' fill='none' stroke='%23d4af37' stroke-width='2' opacity='0.06'/%3E%3Cg fill='%23f0c419' opacity='0.05'%3E%3Cpath d='M300 560c10-70 40-110 90-140 30-18 40-45 35-70-4-20 8-35 25-32 15 3 18 20 12 33-10 22-2 40 18 55 45 33 60 78 55 150-60 25-175 28-235 4z'/%3E%3Cpath d='M600 560c-10-70-40-110-90-140-30-18-40-45-35-70 4-20-8-35-25-32-15 3-18 20-12 33 10 22 2 40-18 55-45 33-60 78-55 150 60 25 175 28 235 4z'/%3E%3C/g%3E%3Cg stroke='%23f0c419' stroke-width='2' opacity='0.05'%3E%3Cpath d='M120 430a330 330 0 0 1 90-225' fill='none'/%3E%3Cpath d='M780 430a330 330 0 0 0-90-225' fill='none'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center top, center, center, center 60px;
+  background-repeat: no-repeat, no-repeat, repeat, no-repeat;
+  background-attachment: scroll, scroll, scroll, fixed;
   color: var(--text-primary);
   min-height: 100vh;
 }

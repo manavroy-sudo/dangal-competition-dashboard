@@ -1,0 +1,1 @@
+﻿Drop leader photos here named leader-01.jpg through leader-22.jpg (JPG or PNG, roughly square, at least 200x200px). They appear automatically in the header band on the next deploy - no code changes needed.

@@ -76,6 +76,83 @@ function MeterBar({
   );
 }
 
+const LEADER_COUNT = 22;
+
+function LeaderAvatar({ index }: { index: number }) {
+  const [failed, setFailed] = useState(false);
+  const src = `/leaders/leader-${String(index).padStart(2, "0")}.jpg`;
+  return (
+    <div className="avatar">
+      {!failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" onError={() => setFailed(true)} />
+      ) : (
+        <span className="ph">🤼</span>
+      )}
+      <style jsx>{`
+        .avatar {
+          width: 64px;
+          height: 64px;
+          min-width: 64px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid var(--gold-deep);
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: radial-gradient(circle at 35% 30%, var(--surface-2), var(--arena-bg-3));
+        }
+        .avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .ph {
+          font-size: 24px;
+          opacity: 0.55;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function LeaderPhotoBand() {
+  const leaders = Array.from({ length: LEADER_COUNT }, (_, i) => i + 1);
+  return (
+    <div className="band">
+      <div className="band-track">
+        {leaders.map((i) => (
+          <LeaderAvatar key={i} index={i} />
+        ))}
+      </div>
+      <div className="scrim" />
+      <style jsx>{`
+        .band {
+          position: relative;
+          height: 130px;
+          overflow: hidden;
+          border-radius: 20px 20px 0 0;
+        }
+        .band-track {
+          display: flex;
+          gap: 14px;
+          align-items: center;
+          padding: 20px 24px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .scrim {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(16, 4, 3, 0.15) 0%, var(--arena-bg-3) 96%);
+          pointer-events: none;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function CornerBadge({ name, color }: { name: string; color: string }) {
   return (
     <div className="badge">
@@ -108,6 +185,8 @@ function BoutCard({ match }: { match: Match }) {
 
   return (
     <div className={`bout ${leader !== "PENDING" ? "decided" : ""}`}>
+      <span className="flag flag-a" aria-hidden="true" />
+      <span className="flag flag-b" aria-hidden="true" />
       <div className="bout-top">
         <span className="bout-no">BOUT {String(match.id).padStart(2, "0")}</span>
         {leaderName ? (
@@ -170,6 +249,23 @@ function BoutCard({ match }: { match: Match }) {
         }
         .bout.decided {
           border-color: rgba(240, 196, 25, 0.35);
+        }
+        .flag {
+          position: absolute;
+          top: 0;
+          width: 0;
+          height: 0;
+          border-style: solid;
+        }
+        .flag-a {
+          left: 16px;
+          border-width: 0 10px 16px 10px;
+          border-color: transparent transparent var(--corner-blue) transparent;
+        }
+        .flag-b {
+          right: 16px;
+          border-width: 0 10px 16px 10px;
+          border-color: transparent transparent var(--corner-red) transparent;
         }
         .bout-top {
           display: flex;
@@ -378,8 +474,10 @@ export default function Page() {
   return (
     <main className="page">
       <header className="hero">
+        <LeaderPhotoBand />
+        <p className="roster-caption">🏆 ZONAL LEADERS BATTLING FOR THE TOP SPOT</p>
         <div className="ring" aria-hidden="true" />
-        <span className="pill">🥇 LIVE · REFRESHES EVERY 30 MIN</span>
+        <span className="pill">⚔️ STATE VS STATE · LIVE · REFRESHES EVERY 30 MIN</span>
         <h1>
           <span className="wrestlers">🤼</span> DANGAL COMPETITION
         </h1>
@@ -476,6 +574,14 @@ export default function Page() {
           border: 2px dashed rgba(212, 175, 55, 0.18);
           pointer-events: none;
           z-index: 0;
+        }
+        .roster-caption {
+          position: relative;
+          font-size: 10.5px;
+          letter-spacing: 0.1em;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          margin: 0 0 18px;
         }
         .pill {
           position: relative;
