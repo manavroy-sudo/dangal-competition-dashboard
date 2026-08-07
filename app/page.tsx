@@ -53,7 +53,7 @@ function MeterBar({ value, status }: { value: number | null; status: Status }) {
         className={`meter-fill ${status === "win" ? "glow" : ""}`}
         style={{
           width: `${width}%`,
-          background: value === null ? "var(--neutral)" : `linear-gradient(90deg, ${color}aa, ${color})`,
+          background: value === null ? "var(--neutral)" : color,
         }}
       />
       <style jsx>{`
@@ -564,7 +564,7 @@ export default function Page() {
 
       <section className="stat-grid">
         <StatTile label="Total Bouts" value={stats.total || 11} />
-        <StatTile label="Decided" value={stats.decided} accent="var(--gold)" />
+        <StatTile label="Leading" value={stats.decided} accent="var(--gold)" />
         <StatTile label="Tied" value={stats.tied} accent="var(--text-secondary)" />
         <StatTile label="Pending Data" value={stats.pending} accent="var(--text-muted)" />
       </section>
@@ -594,7 +594,7 @@ export default function Page() {
               <th>Onb %</th>
               <th>Act %</th>
               <th>Avg</th>
-              <th>Winner</th>
+              <th>Leading</th>
             </tr>
           </thead>
           <tbody>
