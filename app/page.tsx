@@ -506,10 +506,12 @@ export default function Page() {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
+    setRefreshing(true);
     try {
-      const res = await fetch("/api/dangal", { cache: "no-store" });
+      const res = await fetch(`/api/dangal?_ts=${Date.now()}`, { cache: "no-store" });
       const json: ApiResponse = await res.json();
       if (json.error) {
         setError(json.error);
@@ -520,6 +522,8 @@ export default function Page() {
       }
     } catch (e: any) {
       setError(e?.message || "Failed to load data");
+    } finally {
+      setRefreshing(false);
     }
   }, []);
 
@@ -558,6 +562,9 @@ export default function Page() {
         <p className="sub">State vs State · Live Onboarding &amp; Activation Leaderboard · All 11 Bouts</p>
         <p className="meta">
           {lastFetched ? `Last synced ${lastFetched.toLocaleTimeString()}` : "Loading live data…"}
+          <button className="refresh-btn" onClick={load} disabled={refreshing}>
+            {refreshing ? "Syncing…" : "↻ Refresh now"}
+          </button>
         </p>
         {error && <p className="err">Couldn&apos;t refresh: {error}</p>}
       </header>
@@ -700,12 +707,34 @@ export default function Page() {
           color: var(--text-muted);
           font-size: 12.5px;
           margin: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
         }
         .err {
           position: relative;
           color: #ff8a80;
           font-size: 12.5px;
           margin-top: 6px;
+        }
+        .refresh-btn {
+          font-family: var(--font-body), sans-serif;
+          font-size: 11.5px;
+          font-weight: 700;
+          color: var(--gold);
+          background: rgba(240, 196, 25, 0.1);
+          border: 1px solid rgba(240, 196, 25, 0.35);
+          padding: 3px 10px;
+          border-radius: 999px;
+          cursor: pointer;
+        }
+        .refresh-btn:disabled {
+          opacity: 0.6;
+          cursor: default;
+        }
+        .refresh-btn:hover:not(:disabled) {
+          background: rgba(240, 196, 25, 0.2);
         }
         .stat-grid {
           display: grid;

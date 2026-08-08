@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 const SHEET_ID = "1wiSsEi0NQ5w44Z17H_WvHDA1utYd3K2M_8actBuj9C8";
 const GID = "1096580895";
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
@@ -116,7 +120,9 @@ function buildSide(row: string[], base: "A" | "B"): Side {
 
 export async function GET() {
   try {
-    const res = await fetch(CSV_URL, { cache: "no-store" });
+    // Cache-bust the sheet export URL itself so no intermediate CDN (Google's
+    // or otherwise) serves a stale CSV snapshot.
+    const res = await fetch(`${CSV_URL}&_ts=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) {
       return NextResponse.json(
         { error: `Sheet fetch failed: ${res.status}` },
@@ -144,10 +150,10 @@ export async function GET() {
       matches.push({ id: matches.length + 1, teamA, teamB, leader });
     }
 
-    return NextResponse.json({
-      matches,
-      updatedAt: new Date().toISOString(),
-    });
+    return NextResponse.json(
+      { matches, updatedAt: new Date().toISOString() },
+      { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || "Unknown error" },
