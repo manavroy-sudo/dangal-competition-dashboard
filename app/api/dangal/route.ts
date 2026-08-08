@@ -6,20 +6,22 @@ const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?forma
 
 // Team A / Team B block starts at the "Team A" header, on the same header
 // row as the ZONE table. Column indices below are 0-based, counting from
-// the first comma-separated cell in each CSV row.
+// the first comma-separated cell in each CSV row. Re-verify against the
+// live CSV header row whenever the sheet's column layout changes (as of
+// Day 2, Team A starts at column U instead of S).
 const COL = {
-  teamA: 18,
-  aRM: 19,
-  aOnbTgt: 20,
-  aOnbAch: 21,
-  aActTgt: 23,
-  aActAch: 24,
-  teamB: 27,
-  bRM: 28,
-  bOnbTgt: 29,
-  bOnbAch: 30,
-  bActTgt: 32,
-  bActAch: 33,
+  teamA: 20,
+  aRM: 21,
+  aOnbTgt: 22,
+  aOnbAch: 23,
+  aActTgt: 25,
+  aActAch: 26,
+  teamB: 29,
+  bRM: 30,
+  bOnbTgt: 31,
+  bOnbAch: 32,
+  bActTgt: 34,
+  bActAch: 35,
 };
 
 const DATA_ROWS = { start: 4, end: 14 }; // 0-indexed rows 4..14 = sheet rows 5..15
